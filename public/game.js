@@ -7,14 +7,26 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
+//Getting game params from url
+const urlparams = new URLSearchParams(window.location.search);
+const skin = urlparams.get('skin');
+const clothes = urlparams.get('clothes');
+const prop = urlparams.get('prop');
+const difficulty = urlparams.get('difficulty');
+
 const map = generateMap();
-const player = new Player(1, 1);
+const player = new Player(1, 1, (prop==='none')?null:(prop), skin, clothes);
 let tick = 0;
 let isGameOver = false;
-let isAttacking = false;
-const attackDuration = 15;
-let attackTimer = 0;
 let score = 0;
+let enemiesDefeated = 0;
+const TICK_DELAY = (difficulty==='EASY')?35:(difficulty==='MEDIUM')?20:10;
+
+let fireballs = [];
+const FIREBALL_SPEED = 0.1;
+const FIREBALL_RANGE = 1.5;
+const FIREBALL_RADIUS = 4;
+
 
 const keysPressed = new Set();
 window.addEventListener('keydown', e => {
@@ -43,30 +55,88 @@ function tryPlayerMove() {
     } else if (keysPressed.has("ArrowRight")) {
         player.move(1, 0, map);
         lastMoveTime = now;
-    } else if (keysPressed.has(" ") && !isAttacking) {
-        isAttacking = true;
-        attackTimer = attackDuration;
-        attackEnemies();
+    } else if (keysPressed.has(" ")) {
+        tryFireball();
         lastMoveTime = now;
     }
 }
 
-function attackEnemies() {
-    let hit = false;
+function launchFireballAt(enemy) {
+    const dx = enemy.x - player.x;
+    const dy = enemy.y - player.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist === 0) return;
+
+    const vx = (dx / dist) * FIREBALL_SPEED;
+    const vy = (dy / dist) * FIREBALL_SPEED;
+
+    fireballs.push({
+        x: player.x + 0.5,
+        y: player.y + 0.5,
+        vx,
+        vy,
+        range: FIREBALL_RANGE,
+        traveled: 0
+    });
+}
+
+function tryFireball() {
     for (const e of enemies) {
         if (!e.alive) continue;
-        const dx = Math.abs(e.x - player.x);
-        const dy = Math.abs(e.y - player.y);
-        if (dx <= 1 && dy <= 1 && (dx || dy)) {
-            e.takeDamage();
-            hit = true;
+        const dx = e.x - player.x;
+        const dy = e.y - player.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist <= FIREBALL_RANGE) {
+            launchFireballAt(e);
             break;
         }
     }
-    if (hit) {
-        player.expression = 'angry';
-        setTimeout(() => player.hp > 0 && (player.expression = 'neutral'), 300);
+}
+
+function updateFireballs() {
+    const newFireballs = [];
+
+    for (const fb of fireballs) {
+        fb.x += fb.vx;
+        fb.y += fb.vy;
+        fb.traveled += Math.sqrt(fb.vx * fb.vx + fb.vy * fb.vy);
+
+        const tileX = Math.floor(fb.x);
+        const tileY = Math.floor(fb.y);
+
+        if (map[tileY]?.[tileX] === 1) continue;
+
+        for (const e of enemies) {
+            if (!e.alive) continue;
+            if (Math.abs(e.x + 0.5 - fb.x) < 0.4 && Math.abs(e.y + 0.5 - fb.y) < 0.4) {
+                e.takeDamage();
+                continue;
+            }
+        }
+
+        if (fb.traveled < fb.range) {
+            newFireballs.push(fb);
+        }
     }
+
+    fireballs = newFireballs;
+}
+
+function drawFireballs(ctx) {
+    for (const fb of fireballs) {
+        ctx.beginPath();
+        ctx.fillStyle = 'orange';
+        ctx.arc(fb.x * TILE_SIZE, fb.y * TILE_SIZE, FIREBALL_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function drawFireballRange() {
+    ctx.beginPath();
+    ctx.arc((player.x + 0.5) * TILE_SIZE, (player.y + 0.5) * TILE_SIZE, FIREBALL_RANGE * TILE_SIZE, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 100, 0, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
 }
 
 function showEndScreen(msg) {
@@ -85,26 +155,11 @@ function spawnEnemies(map, count) {
         const x = Math.floor(Math.random() * map[0].length);
         const y = Math.floor(Math.random() * map.length);
         if (map[y][x] === 0 && (x !== 1 || y !== 1) && Math.abs(x - 1) + Math.abs(y - 1) > 3) {
-            out.push(new Enemy(x, y));
+            out.push(new Enemy(x, y, difficulty));
             placed++;
         }
     }
     return out;
-}
-
-function drawAttackRange(ctx, px, py) {
-    ctx.fillStyle = 'rgba(255, 255, 0, 0.4)';
-    ctx.strokeStyle = 'rgba(255, 255, 0, 0.8)';
-    ctx.lineWidth = 2;
-    for (let dx = -1; dx <= 1; dx++) {
-        for (let dy = -1; dy <= 1; dy++) {
-            if (!dx && !dy) continue;
-            const x = px + dx, y = py + dy;
-            if (x < 0 || y < 0 || y >= map.length || x >= map[0].length) continue;
-            ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-            ctx.strokeRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-        }
-    }
 }
 
 function updateUI() {
@@ -119,14 +174,16 @@ function gameLoop() {
     if (isGameOver) return;
 
     tryPlayerMove();
+    updateFireballs();
     updateUI();
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawMap(ctx, map);
+    drawFireballRange();
     player.draw(ctx);
+    drawFireballs(ctx);
 
-    // Run AI decisions less often (every 30 ticks)
-    if (tick % 5 === 0) {
+    if (tick % TICK_DELAY === 0) {
         for (const e of enemies) {
             if (!e.alive) continue;
             e.updateAI(map, player);
@@ -135,16 +192,13 @@ function gameLoop() {
 
     for (const e of enemies) {
         if (!e.alive) continue;
-        e.updatePixelPosition();  // always update pixel position for smooth animation
         e.draw(ctx);
-
         if (e.isTouchingPlayer(player)) {
             player.takeDamage();
             if (player.hp <= 0) {
                 showEndScreen('💀 Game Over! You were defeated.');
                 return;
             }
-            // Push enemy back if possible
             const dx = e.x - player.x;
             const dy = e.y - player.y;
             const nx = e.x + Math.sign(dx);
@@ -168,16 +222,9 @@ function gameLoop() {
         score += 200;
     }
 
-    if (isAttacking) {
-        attackTimer--;
-        drawAttackRange(ctx, player.x, player.y);
-        if (attackTimer <= 0) isAttacking = false;
-    }
-
     tick++;
     requestAnimationFrame(gameLoop);
 }
-
 
 async function startGame() {
     try {

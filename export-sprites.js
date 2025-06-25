@@ -26,15 +26,15 @@ function drawProp(ctx, propName) {
         // Burger King style simple crown: 3 gold bumps with a red jewel in the middle
 
         // Top row: 3 gold bumps at x=0,2,4 y=0
-        drawPixel(ctx, 0, 0, '#fc0'); // gold bump left
-        drawPixel(ctx, 2, 0, '#fc0'); // gold bump middle
+        drawPixel(ctx, 0.75, 0, '#fc0'); // gold bump left
+        drawPixel(ctx, (4.75/2), 0, '#fc0'); // gold bump middle
         drawPixel(ctx, 4, 0, '#fc0'); // gold bump right
 
         // Bottom row: 5 gold pixels with jewel in the middle (x=2)
-        drawPixel(ctx, 0, 1, '#fc0'); // gold left edge
-        drawPixel(ctx, 1, 1, '#fc0');
-        drawPixel(ctx, 2, 1, '#f00'); // red jewel center
-        drawPixel(ctx, 3, 1, '#fc0');
+        drawPixel(ctx, 0.75, 1, '#fc0'); // gold left edge
+        drawPixel(ctx, 1.75, 1, '#fc0');
+        drawPixel(ctx, 2.75, 1, '#f00'); // red jewel center
+        drawPixel(ctx, 3.75, 1, '#fc0');
         drawPixel(ctx, 4, 1, '#fc0');
     } else if (propName === 'cape') {
         drawPixel(ctx, 0.9, 4, '#a00');

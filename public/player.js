@@ -5,15 +5,15 @@ const PIXEL_SIZE = 4;
 const SPRITE_SCALE = PIXEL_SIZE * 8;
 
 export class Player {
-    constructor(x, y) {
+    constructor(x, y, prop=null, skintone='f1c27d', clothes='0033cc') {
         this.x = x;
         this.y = y;
         this.pixelX = x * SPRITE_SCALE;
         this.pixelY = y * SPRITE_SCALE;
         this.expression = 'neutral';
-        this.prop = null
-        this.skintone = 'f1c27d';
-        this.clothes='0033cc';
+        this.prop = prop;
+        this.skintone = skintone;
+        this.clothes=clothes;
         this.hp = 3;
         this.maxHp = 3;
         this.moving = false;

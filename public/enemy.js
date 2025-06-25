@@ -4,7 +4,7 @@ const PIXEL_SIZE = 4;
 const SPRITE_SCALE = PIXEL_SIZE * 8;
 
 export class Enemy {
-    constructor(x, y) {
+    constructor(x, y, difficulty='EASY') {
         this.x = x;
         this.y = y;
         this.pixelX = x * SPRITE_SCALE;
@@ -19,7 +19,7 @@ export class Enemy {
         this.spriteOffsetY = 0;
         this.spriteReady = false;
         this.moveCooldown = 0;
-        this.MOVE_COOLDOWN_TIME = 5;
+        this.MOVE_COOLDOWN_TIME = (difficulty==="EASY")?(5):((difficulty==="MEDIUM")?(3):(1));
     }
 
     updatePixelPosition() {
