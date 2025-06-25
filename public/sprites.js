@@ -26,7 +26,7 @@ export async function loadPlayerSprites() {
             for (const cloth of clothes) {
                 for (const prop of props) {
                     const key = `${expr}-skin${skin}-clothes${cloth}${prop ? '-' + prop : ''}`;
-                    const filename = `./assets/player-${key}.png`;
+                    const filename = `assets/player-${key}.png`;
                     const path = `./${filename}`; // assumes images are in the same directory
 
                     const p = loadImage(path)
@@ -45,7 +45,7 @@ export async function loadPlayerSprites() {
 // Load all basic enemy sprites
 export async function loadEnemySprites() {
     const promises = enemyExpressions.map(expr => {
-        const path = `./assets/enemy-${expr}.png`;
+        const path = `assets/enemy-${expr}.png`;
         return loadImage(path)
             .then(img => EnemySprites[expr] = img)
             .catch(err => console.warn(`[Missing] enemy-${expr}.png`));
