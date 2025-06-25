@@ -19,7 +19,6 @@ const player = new Player(1, 1, (prop==='none')?null:(prop), skin, clothes);
 let tick = 0;
 let isGameOver = false;
 let score = 0;
-let enemiesDefeated = 0;
 const TICK_DELAY = (difficulty==='EASY')?35:(difficulty==='MEDIUM')?20:10;
 
 let fireballs = [];
@@ -110,6 +109,10 @@ function updateFireballs() {
             if (!e.alive) continue;
             if (Math.abs(e.x + 0.5 - fb.x) < 0.4 && Math.abs(e.y + 0.5 - fb.y) < 0.4) {
                 e.takeDamage();
+                if (!e.alive){
+                    score += 100;
+                    player.heal(1);
+                }
                 continue;
             }
         }
@@ -211,19 +214,13 @@ function gameLoop() {
     }
 
     if (map[player.y][player.x] === 2) {
-        const bonus = player.hp * 50 + enemies.filter(e => !e.alive).length * 100;
+        const bonus = player.hp * 30;
         score += bonus;
         showEndScreen("🎉 You escaped the dungeon!");
         return;
     }
-
-    if (enemies.every(e => !e.alive)) {
-        player.heal(1);
-        score += 200;
-    }
-
     tick++;
-    requestAnimationFrame(gameLoop);
+    if (!isGameOver) requestAnimationFrame(gameLoop);
 }
 
 async function startGame() {
