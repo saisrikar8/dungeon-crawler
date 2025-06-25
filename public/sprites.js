@@ -1,5 +1,3 @@
-// sprites.js
-
 const playerExpressions = ['neutral', 'happy', 'angry', 'hurt'];
 const skinTones = ['f1c27d', 'e0ac69', '8d5524'];
 const clothes = ['0033cc', '8800cc', 'cc0000'];
