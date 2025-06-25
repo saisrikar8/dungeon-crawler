@@ -26,9 +26,9 @@ function getSpriteKey() {
 
 function updateAvatar() {
     const key = getSpriteKey();
-    const img = PlayerSprites[key];
-    if (img) {
-        avatarImg.src = img.src;
+    if (key) {
+        avatarImg.src = './assets/player-' + key + '.png';
+        avatarImg.alt = 'Avatar: ' + key + ''
     } else {
         avatarImg.src = '';
         console.warn(`Missing sprite for key: ${key}`);
