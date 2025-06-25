@@ -1,4 +1,5 @@
 import { EnemySprites } from './sprites.js';
+import {TILE_SIZE} from "./map.js";
 
 const PIXEL_SIZE = 4;
 const SPRITE_SCALE = PIXEL_SIZE * 8;
@@ -10,8 +11,8 @@ export class Enemy {
         this.pixelX = x * SPRITE_SCALE;
         this.pixelY = y * SPRITE_SCALE;
         this.expression = 'neutral';
-        this.hp = 2;
-        this.maxHp = 2;
+        this.hp = difficulty==="EASY"?(2):((difficulty==="MEDIUM")?(3):(4));
+        this.maxHp = difficulty==="EASY"?(2):((difficulty==="MEDIUM")?(3):(4));
         this.alive = true;
         this.mode = 'patrol';
         this.patrolCooldown = 0;
@@ -20,6 +21,29 @@ export class Enemy {
         this.spriteReady = false;
         this.moveCooldown = 0;
         this.MOVE_COOLDOWN_TIME = (difficulty==="EASY")?(5):((difficulty==="MEDIUM")?(3):(1));
+    }
+
+    drawHealthBar(ctx) {
+        const barWidth = 32;
+        const barHeight = 5;
+        const healthRatio = this.hp / this.maxHp;
+
+        const barX = this.x*TILE_SIZE - 4;
+        const barY = this.y*TILE_SIZE - barHeight - 10; // slightly above the character
+
+        console.log(this.x, this.y, barX, barY, barWidth, barHeight, healthRatio);
+
+        // Background (red)
+        ctx.fillStyle = "red";
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // Foreground (green)
+        ctx.fillStyle = "limegreen";
+        ctx.fillRect(barX, barY, barWidth * healthRatio, barHeight);
+
+        // Border (optional)
+        ctx.strokeStyle = "black";
+        ctx.strokeRect(barX, barY, barWidth, barHeight);
     }
 
     updatePixelPosition() {
@@ -43,6 +67,7 @@ export class Enemy {
             ctx.fillStyle = 'red';
             ctx.fillRect(this.pixelX, this.pixelY, SPRITE_SCALE, SPRITE_SCALE);
         }
+        this.drawHealthBar(ctx);
     }
 
     takeDamage() {
