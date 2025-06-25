@@ -20,6 +20,28 @@ export class Player {
         this.spriteOffsetX = 0;
         this.spriteOffsetY = 0;
     }
+    drawHealthBar(ctx) {
+        const barWidth = 32;
+        const barHeight = 5;
+        const healthRatio = this.hp / this.maxHp;
+
+        const barX = this.x*TILE_SIZE - 4;
+        const barY = this.y*TILE_SIZE - barHeight - 10; // slightly above the character
+
+        console.log(this.x, this.y, barX, barY, barWidth, barHeight, healthRatio);
+
+        // Background (red)
+        ctx.fillStyle = "red";
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // Foreground (green)
+        ctx.fillStyle = "limegreen";
+        ctx.fillRect(barX, barY, barWidth * healthRatio, barHeight);
+
+        // Border (optional)
+        ctx.strokeStyle = "black";
+        ctx.strokeRect(barX, barY, barWidth, barHeight);
+    }
 
     updatePixelPosition() {
         const targetX = this.x * SPRITE_SCALE;
@@ -44,6 +66,7 @@ export class Player {
             ctx.fillStyle = 'gray';
             ctx.fillRect(this.pixelX, this.pixelY, SPRITE_SCALE, SPRITE_SCALE);
         }
+        this.drawHealthBar(ctx)
     }
 
     move(dx, dy, map) {
