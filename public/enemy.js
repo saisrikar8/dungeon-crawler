@@ -1,18 +1,18 @@
 import { EnemySprites } from './sprites.js';
-import {TILE_SIZE} from "./map.js";
+import { TILE_SIZE } from "./map.js";
 
 const PIXEL_SIZE = 4;
 const SPRITE_SCALE = PIXEL_SIZE * 8;
 
 export class Enemy {
-    constructor(x, y, difficulty='EASY') {
+    constructor(x, y, difficulty = 'EASY') {
         this.x = x;
         this.y = y;
         this.pixelX = x * SPRITE_SCALE;
         this.pixelY = y * SPRITE_SCALE;
         this.expression = 'neutral';
-        this.hp = difficulty==="EASY"?(2):((difficulty==="MEDIUM")?(3):(4));
-        this.maxHp = difficulty==="EASY"?(2):((difficulty==="MEDIUM")?(3):(4));
+        this.hp = difficulty === "EASY" ? (2) : ((difficulty === "MEDIUM") ? (3) : (4));
+        this.maxHp = difficulty === "EASY" ? (2) : ((difficulty === "MEDIUM") ? (3) : (4));
         this.alive = true;
         this.mode = 'patrol';
         this.patrolCooldown = 0;
@@ -20,7 +20,7 @@ export class Enemy {
         this.spriteOffsetY = 0;
         this.spriteReady = false;
         this.moveCooldown = 0;
-        this.MOVE_COOLDOWN_TIME = (difficulty==="EASY")?(5):((difficulty==="MEDIUM")?(3):(1));
+        this.MOVE_COOLDOWN_TIME = (difficulty === "EASY") ? (5) : ((difficulty === "MEDIUM") ? (3) : (1));
     }
 
     drawHealthBar(ctx) {
@@ -28,8 +28,8 @@ export class Enemy {
         const barHeight = 5;
         const healthRatio = this.hp / this.maxHp;
 
-        const barX = this.x*TILE_SIZE - 4;
-        const barY = this.y*TILE_SIZE - barHeight - 10; // slightly above the character
+        const barX = this.x * TILE_SIZE - 4;
+        const barY = this.y * TILE_SIZE - barHeight - 10; // slightly above the character
 
         console.log(this.x, this.y, barX, barY, barWidth, barHeight, healthRatio);
 
